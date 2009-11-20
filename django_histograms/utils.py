@@ -59,7 +59,7 @@ HISTOGRAM_CSS = """
 }"""
 
 class Histogram(object):
-    def __init__(self, model, attname, queryset=None, months=None, days=None):
+    def __init__(self, model, attname, queryset=None, months=None, days=None, year=None, month=None, day=None):
         # `queryset` exists so it can work with the admin (bad idea?)
         self.model = model
         self.attname = attname
@@ -67,6 +67,7 @@ class Histogram(object):
         assert(months or days, 'You must pass either months or days, not both.')
         self.months = months
         self.days = days
+        self.year, self.month, self.day = year, month, day
     
     def render(self, css=False, day_labels=True):
         context = self.get_report()
@@ -83,9 +84,18 @@ class Histogram(object):
     
     def get_report(self):
         months = {}
+
+        date = None
+        if self.year and self.month and self.day:
+            date = datetime.date(int(self.year), int(self.month), int(self.day))
+        elif self.year and self.month:
+            date = datetime.date(int(self.year), int(self.month), 1)
+
         if self.months:
-            this_month = datetime.date.today().replace(day=1)
-            last_month = this_month
+            if not date:
+                last_month = datetime.date.today().replace(day=1)
+            else:
+                last_month = date
             for m in xrange(self.months):
                 cutoff = last_month
                 months['%s.%s' % (last_month.month, last_month.year)] = [
@@ -97,9 +107,14 @@ class Histogram(object):
             grouper = lambda x: '%s.%s' % (x.month, x.year)
             day_grouper = lambda x: x.day-1
         elif self.days:
-            cutoff = datetime.datetime.now() - datetime.timedelta(days=self.days)
+            if not date:
+                now = datetime.datetime.now()
+            else:
+                now = date
+
+            cutoff = now - datetime.timedelta(days=self.days)
             grouper = lambda x: None
-            day_grouper = lambda x: (datetime.datetime.now() - x).days
+            day_grouper = lambda x: (now - x).days
             months[None] = ['Last %s Days' % (self.days), ([0] * self.days), 0]
             
         qs = self.get_query_set().values(self.attname).annotate(
@@ -108,8 +123,11 @@ class Histogram(object):
         
         for data in qs.iterator():
             idx = grouper(data[self.attname])
-            months[idx][1][day_grouper(data[self.attname])] += data["num"]
-            months[idx][2] += data["num"]
+            try:
+                months[idx][1][day_grouper(data[self.attname])] += data["num"]
+                months[idx][2] += data["num"]
+            except:
+                pass
         print months
         return {
             "results": months.values(),

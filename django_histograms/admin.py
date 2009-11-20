@@ -7,7 +7,6 @@ from django_histograms.utils import Histogram
 
 
 class HistogramAdmin(admin.ModelAdmin):
-    histogram_field = None
     histogram_months = 2
     histogram_days = None
     
@@ -19,9 +18,9 @@ class HistogramAdmin(admin.ModelAdmin):
         return urlpatterns + super(HistogramAdmin, self).get_urls()
     
     def report_view(self, request):
-        assert self.histogram_field is not None, "Set histogram_field you idiot"
+        assert self.date_hierarchy is not None, "Set date_hierarchy you idiot"
 
-        histogram = Histogram(self.model, self.histogram_field,
+        histogram = Histogram(self.model, self.date_hierarchy,
             self.queryset(request), months=self.histogram_months,
             days=self.histogram_days)
         
