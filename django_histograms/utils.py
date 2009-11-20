@@ -128,7 +128,6 @@ class Histogram(object):
                 months[idx][2] += data["num"]
             except:
                 pass
-        print months
         return {
             "results": months.values(),
             "total": sum(o for m in months.itervalues() for o in m[1]),
