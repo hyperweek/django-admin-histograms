@@ -16,7 +16,7 @@
 		<ul>
 			{% for num in data %}
 				<li>
-				<a href="?&{{ attname }}__day={{ forloop.counter }}" title="{{ num }}">
+				<a href="javascript:if(String(document.location).indexOf('?') != -1) {document.location+='&{{ attname }}__day={{ forloop.counter }}';} else {document.location+='?{{ attname }}__day={{ forloop.counter }}';};void(0);" title="{{ num }}">
 						{% if day_labels %}
 							<span class="label">{{ forloop.counter }}</span>
 						{% endif %}
