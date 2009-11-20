@@ -130,5 +130,6 @@ class Histogram(object):
                 pass
         return {
             "results": months.values(),
+            "attname": self.attname,
             "total": sum(o for m in months.itervalues() for o in m[1]),
         }

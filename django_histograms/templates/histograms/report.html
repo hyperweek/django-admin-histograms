@@ -16,7 +16,7 @@
 		<ul>
 			{% for num in data %}
 				<li>
-					<a href="#" title="{{ num }}">
+				<a href="?&{{ attname }}__day={{ forloop.counter }}" title="{{ num }}">
 						{% if day_labels %}
 							<span class="label">{{ forloop.counter }}</span>
 						{% endif %}
