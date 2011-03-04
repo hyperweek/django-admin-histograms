@@ -1,7 +1,7 @@
 from django import template
 
 from templatetag_sugar.register import tag
-from templatetag_sugar.parser import Name, Variable, Constant, Optional, Model
+from templatetag_sugar.parser import Variable, Optional, Model
 
 from django_histograms.utils import Histogram
 
@@ -26,3 +26,10 @@ def histogram_for(context, model, attname, months=2, day_labels=True):
 def histogram_for_days(context, model, attname, days=31, day_labels=True):
     dates = get_date_filter(context, attname)
     return Histogram(model, attname, days=days, **dates).render(css=True, day_labels=day_labels)
+
+@tag(register, [Model(), Variable(), Optional([Variable(), Variable()])])
+def histogram_overview_for(context, model, attname):
+    dates = get_date_filter(context, attname)
+    if 'day' in dates:
+        del dates['day']
+    return Histogram(model, attname, months=1, **dates).render(css=True, day_labels=True)
