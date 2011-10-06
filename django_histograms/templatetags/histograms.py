@@ -7,6 +7,7 @@ from django_histograms.utils import Histogram
 
 register = template.Library()
 
+
 def get_date_filter(context, attname):
     request = context['request']
     filters = [("%s__%s" % (str(attname), a), a) for a in ["year", "month", "day"]]
@@ -15,6 +16,7 @@ def get_date_filter(context, attname):
         if filter[0] in request.GET:
             r[filter[1]] = request.GET[filter[0]]
     return r
+
 
 @tag(register, [Model(), Variable(), Optional([Variable(), Variable()])])
 def histogram_for(context, model, attname, months=2, day_labels=True):
@@ -27,7 +29,8 @@ def histogram_for_days(context, model, attname, days=31, day_labels=True):
     dates = get_date_filter(context, attname)
     return Histogram(model, attname, days=days, **dates).render(css=True, day_labels=day_labels)
 
-@tag(register, [Model(), Variable(), Optional([Variable(), Variable()])])
+
+@tag(register, [Model(), Variable()])
 def histogram_overview_for(context, model, attname):
     dates = get_date_filter(context, attname)
     if 'day' in dates:

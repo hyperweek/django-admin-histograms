@@ -58,8 +58,10 @@ HISTOGRAM_CSS = """
     background: #2D7BB2;
 }"""
 
+
 class Histogram(object):
-    def __init__(self, model, attname, queryset=None, months=None, days=None, year=None, month=None, day=None):
+    def __init__(self, model, attname, queryset=None, months=None, days=None,
+        year=None, month=None, day=None):
         # `queryset` exists so it can work with the admin (bad idea?)
         self.model = model
         self.attname = attname
@@ -68,20 +70,20 @@ class Histogram(object):
         self.months = months
         self.days = days
         self.year, self.month, self.day = year, month, day
-    
+
     def render(self, css=False, day_labels=True):
         context = self.get_report()
         context['day_labels'] = day_labels
         if css:
             context['css'] = HISTOGRAM_CSS
         return render_to_string("histograms/report.html", context)
-    
+
     def get_query_set(self):
         return self._queryset or self.model.objects.all()
-    
+
     def get_css(self):
         return mark_safe(HISTOGRAM_CSS)
-    
+
     def get_report(self):
         months = {}
 
@@ -105,7 +107,7 @@ class Histogram(object):
                 ]
                 last_month = (last_month - datetime.timedelta(days=1)).replace(day=1)
             grouper = lambda x: '%s.%s' % (x.month, x.year)
-            day_grouper = lambda x: x.day-1
+            day_grouper = lambda x: x.day - 1
         elif self.days:
             if not date:
                 now = datetime.datetime.now()
@@ -116,11 +118,11 @@ class Histogram(object):
             grouper = lambda x: None
             day_grouper = lambda x: (now - x).days
             months[None] = ['Last %s Days' % (self.days), ([0] * self.days), 0]
-            
+
         qs = self.get_query_set().values(self.attname).annotate(
             num=Count("pk")
         ).filter(**{"%s__gt" % str(self.attname): cutoff})
-        
+
         for data in qs.iterator():
             idx = grouper(data[self.attname])
             try:
